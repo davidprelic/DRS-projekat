@@ -23,6 +23,12 @@ def play2_clicked():
     #neka akcija
 
 class Ui_MainWindow(object):
+    def __init__(self, quitMethodMainWindow, parent=None):
+        super(Ui_MainWindow, self).__init__(parent)
+
+        self.setupUi(self, Ui_MainWindow)
+        self.retranslateUi(self, Ui_MainWindow)
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(850, 650)
@@ -148,7 +154,7 @@ class Ui_MainWindow(object):
         self.pushButton_4.setText(_translate("MainWindow", "Quit"))
         self.pushButton_5.setText(_translate("MainWindow", "Multiplayer"))
 
-
+'''
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
@@ -157,3 +163,4 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+'''
