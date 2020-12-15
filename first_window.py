@@ -2,6 +2,7 @@ from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import QWidget, QPushButton, QMainWindow, QHBoxLayout, \
     QDesktopWidget, QVBoxLayout, QLabel
 
+from game_window import GameWindow
 
 
 class FirstWindow(QMainWindow):
@@ -48,6 +49,7 @@ class FirstWindow(QMainWindow):
 
     def show_game_window_1p(self):
         self.close()
+        self.next_window=GameWindow()
 
     def show_game_window_2p(self):
         pass
