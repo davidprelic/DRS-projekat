@@ -2,6 +2,9 @@ from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDesktopWidget, QWidget, QGridLayout, QMainWindow, QLabel
 
+from player import Player
+
+
 class GameWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -105,6 +108,8 @@ class GameWindow(QMainWindow):
         self.setWindowTitle("Bubble Bobble")
         self.setGeometry(100, 100, 850, 650)
         self.setStyleSheet("background-color: black;")
+        self.player = Player(self, grid)
+        self.player.setFocus()
 
         # centriraj window i prikazi ga
         self.center()
