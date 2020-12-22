@@ -49,11 +49,12 @@ class FirstWindow(QMainWindow):
 
     def show_game_window_1p(self):
         self.close()
-        self.next_window=GameWindow()
+        self.next_window=GameWindow(1)
 
 
     def show_game_window_2p(self):
-        pass
+        self.close()
+        self.next_window = GameWindow(2)
 
     def quit_game(self):
         self.close()
