@@ -3,6 +3,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDesktopWidget, QWidget, QGridLayout, QMainWindow, QLabel
 
 from bullet import Bullet
+from dead_enemy import DeadEnemy
 from enemy import Enemy
 from player import Player
 
@@ -112,9 +113,15 @@ class GameWindow(QMainWindow):
         self.setGeometry(100, 100, 850, 650)
         # da nema ovoga videla bi se mreza
         self.setStyleSheet("background-color: black;")
+
         self.enemies = []
         self.enemies.append(Enemy(self, grid, 400, 50))
         self.enemies.append(Enemy(self, grid, 450, 50))
+
+        self.dead_enemies = []
+        self.dead_enemies.append(DeadEnemy(self, grid, -100, -100))
+        self.dead_enemies.append(DeadEnemy(self, grid, -100, -100))
+
         self.bullet1 = Bullet(self, grid)
         #self.bullet.raise_()
         # sakrij bullet widget na iza nekog drugog widget-a na njegovoj poziciji

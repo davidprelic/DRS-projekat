@@ -11,8 +11,10 @@ class Bullet(QLabel):
         # kreiraj bullet
         self.setGeometry(51, 570, 32, 32)
         self.setPixmap(QtGui.QPixmap('Images/bubble_ball.png'))
+        self.enemies = nebitno.enemies
         self.nebitno = nebitno
         self.game_win = nebitno
+        self.dead_enemies = nebitno.dead_enemies
         self.grid = grid
         self.setAccessibleName("bullet")
         self.metak_u_letu = False
@@ -70,23 +72,29 @@ class Bullet(QLabel):
                     break
             self.lower()
             self.metak_u_letu = False
+
     # uzimam sva polja grida, filtriram samo cigle, zatim filtriram sve cigle koje su u x osi odmah desno uz bullet(+- 5px)
     # i na kraju filtriram samo ciglu koja je u ravni sa bullet-om po y osi
     def proveri_desno(self):
         items = (self.grid.itemAt(i) for i in range(self.grid.count()))
+
         bricks = []
 
         for w in items:
             if w.widget().accessibleName() == "brick":
                 bricks.append(w.widget())
 
-
+        enemies_2 = []
         bricks_2 = []
 
         for brick in bricks:
             if brick.x() >= (self.x() + self.width()) and brick.x() <= (self.x() + self.width()) + 5:
                 bricks_2.append(brick)
 
+        for enemy in self.enemies:
+            if enemy.x() >= (self.x() + self.width()) and enemy.x() <= (self.x() + self.width()) + 10:
+                enemies_2.append(enemy)
+
         gornja_ivica_bulleta = self.y()
         donja_ivica_bulleta = self.y() + self.height()
         brick_konacno = []
@@ -97,25 +105,45 @@ class Bullet(QLabel):
                 brick_konacno.append(brick2)
                 #print(brick2.pos())
 
+        enemy_konacno = []
 
-        return len(brick_konacno) == 0
+        for enemy in enemies_2:
+            if (enemy.y() <= gornja_ivica_bulleta and ((enemy.y() + enemy.height()) > gornja_ivica_bulleta)) or (
+                    donja_ivica_bulleta <= (enemy.y() + enemy.height()) and donja_ivica_bulleta >= enemy.y()):
+                enemy_konacno.append(enemy)
+                # stvori jaje i unisti enemija
+                enemy.lower()
+                for d_en in self.dead_enemies:
+                    if d_en.x() == -100:
+                        d_en.move(enemy.x(), enemy.y())
+                        d_en.kreni_ka_gore(False)
+                        break
+
+                self.enemies.remove(enemy)
+
+        return len(brick_konacno) == 0 and len(enemy_konacno) == 0
 
     # uzimam sva polja grida, filtriram samo cigle, zatim filtriram sve cigle koje su u x osi odmah levo uz bullet(+- 5px)
     # i na kraju filtriram samo ciglu koja je u ravni sa bullet-om po y osi
     def proveri_levo(self):
         items = (self.grid.itemAt(i) for i in range(self.grid.count()))
+
         bricks = []
 
         for w in items:
             if w.widget().accessibleName() == "brick":
                 bricks.append(w.widget())
 
-
         bricks_2 = []
+        enemies_2 = []
+
         for brick in bricks:
             if brick.x() + brick.width() <= self.x() and (brick.x() + brick.width()) >= (self.x() - 5):
                 bricks_2.append(brick)
 
+        for enemy in self.enemies:
+            if enemy.x() + enemy.width() <= self.x() and (enemy.x() + enemy.width()) >= (self.x() - 10):
+                enemies_2.append(enemy)
 
         gornja_ivica_bulleta = self.y()
         donja_ivica_bulleta = self.y() + self.height()
@@ -127,5 +155,20 @@ class Bullet(QLabel):
                 brick_konacno.append(brick2)
                 #print(brick2.pos())
 
+        enemy_konacno = []
 
-        return len(brick_konacno) == 0
+        for enemy in enemies_2:
+            if (enemy.y() <= gornja_ivica_bulleta and ((enemy.y() + enemy.height()) > gornja_ivica_bulleta)) or (
+                    donja_ivica_bulleta <= (enemy.y() + enemy.height()) and donja_ivica_bulleta >= enemy.y()):
+                enemy_konacno.append(enemy)
+                # stvori jaje i unisti enemija
+                enemy.lower()
+                for d_en in self.dead_enemies:
+                    if d_en.x() == -100:
+                        d_en.move(enemy.x(), enemy.y())
+                        d_en.kreni_ka_gore(False)
+                        break
+
+                self.enemies.remove(enemy)
+
+        return len(brick_konacno) == 0 and len(enemy_konacno) == 0
