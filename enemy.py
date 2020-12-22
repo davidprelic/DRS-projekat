@@ -85,15 +85,42 @@ class Enemy(QLabel):
                 t.start()
                 self.move(self.x() - 5, self.y())
                 self.fall(False)
-
+            else:
+                self.setPixmap(QtGui.QPixmap('Images/enemy_right.png'))
+                self.setAccessibleName("enemy_right")
+                self.enemy_kretnja_desno(False)
         else:
             while self.proveri_zid_levo():
                 self.move(self.x() - 5, self.y())
                 self.fall(False)
                 sleep(0.01)
+            self.setPixmap(QtGui.QPixmap('Images/enemy_right.png'))
+            self.setAccessibleName("enemy_right")
+            self.enemy_kretnja_desno(False)
 
-
-
+    # enemy ce se kretati desno dok god ne naidje na zid, kad naidje na zid menja sliku u enemy_left i pocinje da ide levo
+    # pri svakom pokretu poziva se i fall funkcija kako bi videli dal ispod enemija ima platforme tj dal treba da pada
+    # samo se jednom poziva threading.Timer.start() koji kreira novi thread za prosledjenu funkciju
+    # da nema provere (if not rekurzija) kreirao bi se novi thread za svaki novi poziv ove funkcije (imalo bi previse threadova)
+    def enemy_kretnja_desno(self, rekurzija):
+        if not rekurzija:
+            t = threading.Timer(0.01, lambda: self.enemy_kretnja_desno(True))
+            if self.proveri_zid_desno():
+                t.start()
+                self.move(self.x() + 5, self.y())
+                self.fall(False)
+            else:
+                self.setPixmap(QtGui.QPixmap('Images/enemy_left.png'))
+                self.setAccessibleName("enemy_left")
+                self.enemy_kretnja_levo(False)
+        else:
+            while self.proveri_zid_desno():
+                self.move(self.x() + 5, self.y())
+                self.fall(False)
+                sleep(0.01)
+            self.setPixmap(QtGui.QPixmap('Images/enemy_left.png'))
+            self.setAccessibleName("enemy_left")
+            self.enemy_kretnja_levo(False)
 
     # provera dal se odmah levo od enemija nalazi zid
     # prvo uzimam sve zidove, zatim filtriram sve one levo od njega (od njegove leve ivice)
@@ -110,6 +137,35 @@ class Enemy(QLabel):
         for brick in bricks:
             if brick.x() + brick.width() <= self.x() and (brick.x() + brick.width()) >= (self.x() - 5):
                 bricks_2.append(brick)
+
+        gornja_ivica_bulleta = self.y()
+        donja_ivica_bulleta = self.y() + self.height()
+        brick_konacno = []
+
+        for brick2 in bricks_2:
+            if (brick2.y() <= gornja_ivica_bulleta and ((brick2.y() + brick2.height()) > gornja_ivica_bulleta)) or (
+                    donja_ivica_bulleta <= (brick2.y() + brick2.height()) and donja_ivica_bulleta >= brick2.y()):
+                brick_konacno.append(brick2)
+                #print(brick2.pos())
+
+        return len(brick_konacno) == 0
+
+    # provera dal se odmah desno od enemija nalazi zid
+    # prvo uzimam sve zidove, zatim filtriram sve one desno od njega (od njegove desne ivice)
+    # i na kraju filtriram samo onaj zid koji se nalazi odmah desno od njega
+    def proveri_zid_desno(self):
+        items = (self.grid.itemAt(i) for i in range(self.grid.count()))
+        bricks = []
+
+        for w in items:
+            if w.widget().accessibleName() == "brick":
+                bricks.append(w.widget())
+
+        bricks_2 = []
+        for brick in bricks:
+            if brick.x() >= (self.x() + self.width()) and brick.x() <= (self.x() + self.width()) + 5:
+                bricks_2.append(brick)
+        #print(len(bricks_2))
 
         gornja_ivica_bulleta = self.y()
         donja_ivica_bulleta = self.y() + self.height()
