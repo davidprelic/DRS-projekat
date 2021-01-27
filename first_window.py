@@ -21,6 +21,7 @@ class FirstWindow(QMainWindow):
         pixmap = QPixmap('Images/first_window_img.jpg')
         label.setPixmap(pixmap)
         self.resize(pixmap.width(), pixmap.height())
+        self.setFixedSize(980, 650)
 
         label.setScaledContents(True)
 
@@ -49,12 +50,12 @@ class FirstWindow(QMainWindow):
 
     def show_game_window_1p(self):
         self.close()
-        self.next_window=GameWindow(1)
+        self.next_window = GameWindow(1, self, 1)
 
 
     def show_game_window_2p(self):
         self.close()
-        self.next_window = GameWindow(2)
+        self.next_window = GameWindow(2, self, 1)
 
     def quit_game(self):
         self.close()
