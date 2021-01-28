@@ -78,25 +78,25 @@ class GameWindow(QMainWindow):
 
         # kreiraj player-a i prosledi mu grid zbog funkcija koje koristi i u kojima ce koristiti grid polja
         self.player1 = Player(self, grid, self.bullet1, 51, 570, 1)
-        # self.deus_ex_machina1 = WorkerDeusExMachina(self.player1, 1, grid)
-        # self.deus_ex_machina1.show_on_grid.connect(self.__show_deus_ex_player1__)
-        # self.deus_ex_machina1.apply_force.connect(self.__apply_deus_ex_player1__)
-        #
-        # self.deus_ex1 = QLabel(self)
-        # self.deus_ex1.setGeometry(-100, -100, 32, 32)
-        # self.deus_ex1.setPixmap(QtGui.QPixmap('Images/deus_ex.jpg'))
-        # self.deus_ex1.lower()
+        self.deus_ex_machina1 = WorkerDeusExMachina(self.player1, 1, grid)
+        self.deus_ex_machina1.show_on_grid.connect(self.__show_deus_ex1__)
+        self.deus_ex_machina1.apply_force.connect(self.__apply_deus_ex1__)
+
+        self.deus_ex1 = QLabel(self)
+        self.deus_ex1.setGeometry(-100, -100, 32, 32)
+        self.deus_ex1.setPixmap(QtGui.QPixmap('Images/deus_ex.jpg'))
+        self.deus_ex1.lower()
 
         if self.num_of_players == 2:
             self.player2 = Player(self, grid, self.bullet2, 735, 570, 2)
-            # self.deus_ex_machina2 = WorkerDeusExMachina(self.player2, 2, grid)
-            # self.deus_ex_machina2.show_on_grid.connect(self.__show_deus_ex_player2__)
-            # self.deus_ex_machina2.apply_force.connect(self.__apply_deus_ex_player2__)
-            #
-            # self.deus_ex2 = QLabel(self)
-            # self.deus_ex2.setGeometry(-100, -100, 32, 32)
-            # self.deus_ex2.setPixmap(QtGui.QPixmap('Images/deus_ex.jpg'))
-            # self.deus_ex2.lower()
+            self.deus_ex_machina2 = WorkerDeusExMachina(self.player2, 2, grid)
+            self.deus_ex_machina2.show_on_grid.connect(self.__show_deus_ex2__)
+            self.deus_ex_machina2.apply_force.connect(self.__apply_deus_ex2__)
+
+            self.deus_ex2 = QLabel(self)
+            self.deus_ex2.setGeometry(-100, -100, 32, 32)
+            self.deus_ex2.setPixmap(QtGui.QPixmap('Images/deus_ex2.jpg'))
+            self.deus_ex2.lower()
 
         #self.player1.setFocus()
         #self.player2.setFocus()
@@ -210,19 +210,23 @@ class GameWindow(QMainWindow):
             self.key_notifier2.key_signal.connect(self.__update_position__)
             self.key_notifier2.start()
 
-        # self.deus_ex_machina1.start()
+        self.deus_ex_machina1.start()
+        if self.num_of_players == 2:
+            self.deus_ex_machina2.start()
 
     # kad ugasim aplikaciju rucno obrisi sve pokrenute procese(threadove) od enemyja
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.key_notifier.die()
         self.shoot_bubble.die()
         self.player1_collision.die()
+        self.deus_ex_machina1.die()
         for em in self.enemy_movement:
             em.die()
         if self.num_of_players == 2:
             self.key_notifier2.die()
             self.shoot_bubble2.die()
             self.player2_collision.die()
+            self.deus_ex_machina2.die()
 
     # centriranje windowa
     def center(self):
@@ -255,29 +259,92 @@ class GameWindow(QMainWindow):
         else:
             generate_next_level = GameWindow(1, self.first_win, self.enemy_speed + 0.5)
 
-    # @pyqtSlot(int)
-    # def __show_deus_ex_player1__(self, place_on_grid):
-    #     if place_on_grid == 1:
-    #         self.deus_ex1.move(95, 300)
-    #         self.deus_ex1.raise_()
-    #     else:
-    #         self.deus_ex1.move(260, 300)
-    #         self.deus_ex1.raise_()
-    #
-    # @pyqtSlot(int)
-    # def __apply_deus_ex_player1__(self, apply_force_num):
-    #     self.deus_ex1.lower()
-    #     self.deus_ex1.move(-100, -100)
-    #     if apply_force_num == 0:
-    #         self.bubble_life3.lower()
-    #
-    # @pyqtSlot(int)
-    # def __show_deus_ex_player2__(self):
-    #     pass
-    #
-    # @pyqtSlot(int)
-    # def __apply_deus_ex_player2__(self):
-    #     pass
+    @pyqtSlot(int)
+    def __show_deus_ex1__(self, place_on_grid):
+        if place_on_grid == 1:
+            self.deus_ex1.move(190, 315)
+            self.deus_ex1.raise_()
+        elif place_on_grid == 2:
+            self.deus_ex1.move(550, 315)
+            self.deus_ex1.raise_()
+
+    @pyqtSlot(list)
+    def __apply_deus_ex1__(self, apply_force_list):
+        if apply_force_list[0] == 1:
+            self.deus_ex1.lower()
+            self.deus_ex1.move(-100, -100)
+            if apply_force_list[1] == 1:
+                if apply_force_list[2] == 1 and self.player1_lives < 3:
+                    if self.player1_lives == 2:
+                        self.bubble_life3.raise_()
+                        self.player1_lives = self.player1_lives + 1
+                    else:
+                        self.bubble_life2.raise_()
+                        self.player1_lives = self.player1_lives + 1
+                else:
+                    if self.player1_lives == 3:
+                        self.bubble_life3.lower()
+                        self.player1_lives = self.player1_lives - 1
+                    elif self.player1_lives == 2:
+                        self.bubble_life2.lower()
+                        self.player1_lives = self.player1_lives - 1
+                    else:
+                        if self.num_of_players == 1:
+                            self.bubble_life1.lower()
+                            self.player1_lives = self.player1_lives - 1
+                            # kraj igre vrati na start game window
+                            self.close()
+                            self.first_win.show()
+                        else:
+                            if self.player2_lives < 1:
+                                self.bubble_life1.lower()
+                                self.player1_lives = self.player1_lives - 1
+                                # kraj igre vrati na start game window
+                                self.close()
+                                self.first_win.show()
+                        self.bubble_life1.lower()
+                        self.player1_lives = self.player1_lives - 1
+                        self.deus_ex_machina1.die()
+
+    @pyqtSlot(int)
+    def __show_deus_ex2__(self, place_on_grid):
+        if place_on_grid == 3:
+            self.deus_ex2.move(220, 445)
+            self.deus_ex2.raise_()
+        elif place_on_grid == 4:
+            self.deus_ex2.move(550, 445)
+            self.deus_ex2.raise_()
+
+    @pyqtSlot(list)
+    def __apply_deus_ex2__(self, apply_force_list):
+        if apply_force_list[0] == 2:
+            self.deus_ex2.lower()
+            self.deus_ex2.move(-100, -100)
+            if apply_force_list[1] == 1:
+                if apply_force_list[2] == 1 and self.player2_lives < 3:
+                    if self.player2_lives == 2:
+                        self.bobble_life1.raise_()
+                        self.player2_lives = self.player2_lives + 1
+                    else:
+                        self.bobble_life2.raise_()
+                        self.player2_lives = self.player2_lives + 1
+                else:
+                    if self.player2_lives == 3:
+                        self.bobble_life1.lower()
+                        self.player2_lives = self.player2_lives - 1
+                    elif self.player2_lives == 2:
+                        self.bobble_life2.lower()
+                        self.player2_lives = self.player2_lives - 1
+                    else:
+                        if self.player1_lives < 1:
+                            self.bobble_life3.lower()
+                            self.player2_lives = self.player2_lives - 1
+                            # kraj igre vrati na start game window
+                            self.close()
+                            self.first_win.show()
+                        self.bobble_life3.lower()
+                        self.player2_lives = self.player2_lives - 1
+                        self.deus_ex_machina2.die()
 
     @pyqtSlot(int)
     def __kill_enemy__(self, en_num):
@@ -368,6 +435,7 @@ class GameWindow(QMainWindow):
             self.bubble_life1.lower()
             self.player1.move(-100, -100)
             self.player1.lower()
+            self.deus_ex_machina1.die()
         else:
             self.bubble_life1.lower()
             # kraj igre vrati na start game window
@@ -393,6 +461,7 @@ class GameWindow(QMainWindow):
             self.bobble_life3.lower()
             self.player2.move(-100, -100)
             self.player2.lower()
+            self.deus_ex_machina2.die()
         else:
             self.bobble_life1.lower()
             # kraj igre vrati na start game window

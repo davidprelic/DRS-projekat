@@ -9,7 +9,7 @@ from worker import Worker
 class WorkerDeusExMachina(Worker):
 
     show_on_grid = pyqtSignal(int)
-    apply_force = pyqtSignal(int)
+    apply_force = pyqtSignal(list)
 
     def __init__(self, player, player_num, grid):
         super().__init__()
@@ -18,13 +18,17 @@ class WorkerDeusExMachina(Worker):
         self.grid = grid
         self.is_done = False
         self.player_num = player_num
-        self.time_until_showing_on_grid = random.randint(4, 8)
-        self.is_placed_on_grid = False
+        self.time_until_showing_on_grid = random.randint(7, 14)
         self.place_on_grid = random.randint(1, 2)
-        self.deus_ex_coords1 = [95, 300]
-        self.deus_ex_coords2 = [260, 300]
+
+        self.deus_ex_coords1 = [190, 315]
+        self.deus_ex_coords2 = [550, 315]
+
+        self.deus_ex_coords3 = [220, 445]
+        self.deus_ex_coords4 = [550, 445]
 
         self.retList = []
+        self.retList.append(self.player_num)
 
     def die(self):
         """
@@ -36,66 +40,63 @@ class WorkerDeusExMachina(Worker):
     def work(self):
         if self.player_num == 1:
             while not self.is_done:
-                if not self.is_placed_on_grid:
-                    time.sleep(self.time_until_showing_on_grid)
-                    self.show_on_grid.emit(self.place_on_grid)
-                    time.sleep(2)
-                    self.proveri_playera_levo_desno()
+                time.sleep(self.time_until_showing_on_grid)
+                self.show_on_grid.emit(self.place_on_grid)
+                time.sleep(2)
+                self.check_if_player_is_in_deus_ex_box_and_apply_force()
 
-
-                    self.time_until_showing_on_grid = random.randint(4, 8)
-                    self.is_placed_on_grid = False
-                else:
-                    time.sleep(0.01)
+                self.time_until_showing_on_grid = random.randint(7, 14)
+                self.place_on_grid = random.randint(1, 2)
         elif self.player_num == 2:
             while not self.is_done:
-                if not self.proveri_enemies_levo_desno():
-                    time.sleep(0.01)
-                    self.killed_by_enemy.emit()
-                    time.sleep(0.01)
-                elif not self.proveri_dead_enemies_levo_desno():
-                    time.sleep(0.01)
-                else:
-                    time.sleep(0.01)
+                time.sleep(self.time_until_showing_on_grid)
+                self.show_on_grid.emit(self.place_on_grid)
+                time.sleep(2)
+                self.check_if_player_is_in_deus_ex_box_and_apply_force()
 
-    def proveri_playera_levo_desno(self):
+                self.time_until_showing_on_grid = random.randint(7, 14)
+                self.place_on_grid = random.randint(3, 4)
+
+    def check_if_player_is_in_deus_ex_box_and_apply_force(self):
 
         if self.place_on_grid == 1:
             coords = self.deus_ex_coords1
-        else:
+        elif self.place_on_grid == 2:
             coords = self.deus_ex_coords2
+        elif self.place_on_grid == 3:
+            coords = self.deus_ex_coords3
+        else:
+            coords = self.deus_ex_coords4
 
-        player_2 = []
+        is_player_in_deus_ex_box = False
 
-        if self.player.x() + self.player.width() <= coords[0] and (self.player.x() + self.player.width()) >= (coords[0] - 10):
-            player_2.append(self.player)
+        if (self.player.x() >= coords[0] and self.player.x() <= (coords[0] + 32)) and (self.player.y() >= coords[1] and (self.player.y() <= coords[1] + 32)):
+            is_player_in_deus_ex_box = True
+        elif (self.player.x() + 32 >= coords[0] and self.player.x() + 32 <= (coords[0] + 32)) and (self.player.y() >= coords[1] and (self.player.y() <= coords[1] + 32)):
+            is_player_in_deus_ex_box = True
+        elif (self.player.x() >= coords[0] and self.player.x() <= (coords[0] + 32)) and (self.player.y() + 32 >= coords[1] and (self.player.y() + 32 <= coords[1] + 32)):
+            is_player_in_deus_ex_box = True
+        elif (self.player.x() + 32 >= coords[0] and self.player.x() + 32 <= (coords[0] + 32)) and (self.player.y() + 32 >= coords[1] and (self.player.y() + 32 <= coords[1] + 32)):
+            is_player_in_deus_ex_box = True
 
-        gornja_ivica_bulleta = coords[1]
-        donja_ivica_bulleta = coords[1] + 32
 
-        player_konacno = []
+        print(is_player_in_deus_ex_box)
+        print(self.player.x())
+        print(self.player.y())
+        print('asdf')
 
-        for pl in player_2:
-            if (pl.y() <= gornja_ivica_bulleta and ((pl.y() + pl.height()) > gornja_ivica_bulleta)) or (
-                    donja_ivica_bulleta <= (pl.y() + pl.height()) and donja_ivica_bulleta >= pl.y()):
-                player_konacno.append(pl)
+        # u retList, prvi element je redni broj playera, drugi element je flag da li je player u deus_ex boxu (0 nije, 1 jeste)
+        # i treci element flag da li se dodaje zivot playeru ili se brise zivot (1 dodaje 0 brise)
+        # prvi element sam dodao odmah na pocetku klase, jer znam koji je redni broj playera
+        # a druga dva dodajem u ovoj funkciji pri svakom pozivu
+        if is_player_in_deus_ex_box:
+            self.retList.append(1)
+            self.retList.append(random.randint(0, 1))
+            self.apply_force.emit(self.retList)
+            self.retList.pop()
+            self.retList.pop()
+        else:
+            self.retList.append(0)
+            self.apply_force.emit(self.retList)
+            self.retList.pop()
 
-        player_3 = []
-
-        if self.player.x() >= (coords[0] + 32) and self.player.x() <= (coords[0] + 32) + 10:
-            player_3.append(self.player)
-
-        gornja_ivica_bulleta = coords[1]
-        donja_ivica_bulleta = coords[1] + 32
-
-        player2_konacno = []
-
-        for pl in player_3:
-            if (pl.y() <= gornja_ivica_bulleta and ((pl.y() + pl.height()) > gornja_ivica_bulleta)) or (
-                    donja_ivica_bulleta <= (pl.y() + pl.height()) and donja_ivica_bulleta >= pl.y()):
-                player2_konacno.append(pl)
-
-                #self.apply_force.emit(random.randint(0, 1))
-                self.apply_force.emit(0)
-
-        return len(player_konacno) == 0 and len(player2_konacno) == 0
